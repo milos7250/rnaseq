@@ -8,6 +8,7 @@ include { FQ_LINT                            } from '../../../modules/nf-core/fq
 include { FQ_LINT as FQ_LINT_AFTER_TRIMMING  } from '../../../modules/nf-core/fq/lint/main'
 include { FQ_LINT as FQ_LINT_AFTER_BBSPLIT   } from '../../../modules/nf-core/fq/lint/main'
 include { FQ_LINT as FQ_LINT_AFTER_SORTMERNA } from '../../../modules/nf-core/fq/lint/main'
+include { FASTQC as FASTQC_AFTER_SORTMERNA   } from '../../../modules/nf-core/fastqc/main'
 
 include { FASTQ_SUBSAMPLE_FQ_SALMON          } from '../fastq_subsample_fq_salmon'
 include { FASTQ_FASTQC_UMITOOLS_TRIMGALORE   } from '../fastq_fastqc_umitools_trimgalore'
@@ -303,6 +304,18 @@ workflow FASTQ_QC_TRIM_FILTER_SETSTRANDEDNESS {
             )
             ch_lint_log = ch_lint_log.mix(FQ_LINT_AFTER_SORTMERNA.out.lint)
             ch_filtered_reads = ch_filtered_reads.join(FQ_LINT_AFTER_SORTMERNA.out.lint.map{it[0]})
+        }
+
+        if (!skip_fastqc) {
+            FASTQC_AFTER_SORTMERNA (
+                ch_filtered_reads
+            )
+            fastqc_sortmerna_html = FASTQC_AFTER_SORTMERNA.out.html
+            fastqc_sortmerna_zip  = FASTQC_AFTER_SORTMERNA.out.zip
+            ch_versions           = ch_versions.mix(FASTQC_AFTER_SORTMERNA.out.versions.first())
+
+            ch_multiqc_files = fastqc_sortmerna_zip.mix(fastqc_sortmerna_html)
+                                                   .mix(ch_multiqc_files)
         }
     }
 

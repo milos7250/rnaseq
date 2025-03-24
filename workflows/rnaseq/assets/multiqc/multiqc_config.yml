@@ -22,6 +22,10 @@ report_section_order:
     order: 4003
   fastqc_trimmed:
     order: 4002
+  sortmerna:
+    order: 4001
+  fastqc_sortmerna:
+    order: 4000
   # Alignment
   star:
     order: 3000
@@ -115,12 +119,21 @@ module_order:
       info: "This section of the report shows FastQC results after adapter trimming."
       path_filters:
         - "*_trimmed*fastqc.zip"
+  - sortmerna
+  - fastqc:
+      anchor: "fastqc_sortmerna"
+      name: "FastQC (after SortMeRNA)"
+      info: "This section of the report shows FastQC results after filtering with SortMeRNA."
+      path_filters:
+        - "*_non_rRNA*fastqc.zip"
 
 # Don't show % Dups in the General Stats table (we have this from Picard)
 table_columns_visible:
   "FastQC (raw)":
     percent_duplicates: false
   "FastQC (trimmed)":
+    percent_duplicates: false
+  "FastQC (after SortMeRNA)":
     percent_duplicates: false
 
 extra_fn_clean_exts:
